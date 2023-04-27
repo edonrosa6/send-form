@@ -12,7 +12,7 @@ export class EmailService {
 
   constructor(private http: HttpClient) { }
 
-  post(request: IEmailRequest): Observable<any> {
+  post(request: IEmailRequest) {
     const url = this.baseAddress + "email";
     return this.http.post<any>(url, request);
   }

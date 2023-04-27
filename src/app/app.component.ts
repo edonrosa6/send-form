@@ -42,7 +42,7 @@ export const MY_FORMATS = {
     { provide: MAT_DATE_FORMATS, useValue: MY_FORMATS },
   ],
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit {
   subscription: Subscription;
   title = 'Green Leaves';
   ciudadesEstados: ICiudadYEstado[] = [];
@@ -82,25 +82,25 @@ export class AppComponent implements OnInit, OnDestroy {
     this.form = this.fb.group({
       fecha: ['', [Validators.required]],
       nombre: ['', [Validators.required, Validators.pattern('')]],
-      telefono: ['', Validators.required],
+      telefono: ['', [Validators.required, Validators.pattern('^\\d{10}$')]],
       correo: ['', [Validators.required, Validators.email]],
       ciudadYEstado: new FormControl(this.ciudadYEstado, Validators.required)
     });
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-  }
-
-
   send() {
     if (this.form.invalid) {
+      if (this.form.get('telefono')?.errors?.['pattern']) {
+        this.errors.push('El número de telefono solo acepta 10 caracteres numericos')
+      }
+
       if (this.form.get('fecha')?.errors?.['required']) {
         this.errors.push('La fecha no es válida');
       }
 
       if (
-        this.form.get('nombre')?.errors ||
+        this.form.get('fecha')?.errors?.['required'] ||
+        this.form.get('nombre')?.errors?.['required'] ||
         this.form.get('correo')?.errors?.['required'] ||
         this.form.get('telefono')?.errors?.['required'] ||
         this.ciudadYEstado.errors?.['required']) {
@@ -108,6 +108,7 @@ export class AppComponent implements OnInit, OnDestroy {
       }
 
       if (this.form.get('correo')?.errors?.['email']) {
+        console.log('debes insertar un correo vlaido');
         this.errors.push('Debes insertar un correo válido');
       }
 
@@ -116,6 +117,7 @@ export class AppComponent implements OnInit, OnDestroy {
         width: "350px"
       })
 
+
       this.errors = [];
 
       return;
@@ -123,12 +125,17 @@ export class AppComponent implements OnInit, OnDestroy {
 
     this.hideForm = true;
 
-    this.emailService.post(this.form.value).subscribe({
+    const request: IEmailRequest = {
+      ciudadYEstado: this.ciudadYEstado.value,
+      correo: this.form.get('correo')?.value,
+      fecha: this.form.get('fecha')?.value,
+      nombre: this.form.get('nombre')?.value,
+      telefono: this.form.get('telefono')?.value
+    }
+
+    this.emailService.post(request).subscribe({
       next: data => {
-        this.dialog.open(AlertComponent, {
-          data: { title: "Excelente", message: "Se ha creado el registro correctamente" },
-          width: '350px'
-        });
+        console.log(data);
       },
       error: err => {
         this.dialog.open(AlertComponent, {
