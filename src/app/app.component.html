@@ -1,21 +1,94 @@
 <div class="container">
-  <h1>{{ title }}</h1>
-  <form (submit)="send()">
-    <mat-form-field appearance="fill">
-      <mat-label>Nombre</mat-label>
-      <input type="text" maxlength="150" name="nombre" matInput />
-    </mat-form-field>
-    <mat-form-field appearance="fill">
-      <mat-label>Teléfono</mat-label>
-      <input type="number" maxlength="150" name="nombre" matInput />
-      <span matTextPrefix>+52</span>
-    </mat-form-field>
+  <div
+    style="height: 100vh"
+    class="d-flex flex-column align-items-center justify-content-center"
+  >
+    <div class="bg-success rounded mb-4 py-3 px-4 w-100">
+      <h1 class="text-light">{{ title }}</h1>
+    </div>
+    <form (ngSubmit)="send()" [formGroup]="form" class="w-100">
+      <div class="row">
+        <div class="col-md-3">
+          <mat-form-field style="width: 100%" appearance="fill">
+            <mat-label>Nombre</mat-label>
+            <input
+              required
+              type="text"
+              maxlength="250"
+              formControlName="nombre"
+              name="nombre"
+              matInput
+            />
+          </mat-form-field>
+        </div>
 
-    <!-- Nombre:<input type="text" name="nombre" /><br />
-    E-mail:<input type="text" name="email" /><br />
-    Teléfono:<input type="text" name="telefono" /><br />
-    Fecha:<input type="text" name="fecha" /><br />
-    Ciudad y Estado:<input type="text" name="ciudad" /><br />
-    <input type="sumbit" value="Enviar" /> -->
-  </form>
+        <div class="col-md-3">
+          <mat-form-field style="width: 100%" appearance="fill">
+            <mat-label>Teléfono</mat-label>
+            <input
+              required
+              type="text"
+              maxlength="40"
+              formControlName="telefono"
+              name="telefono"
+              matInput
+            />
+            <span matTextPrefix>+52</span>
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-3">
+          <mat-form-field style="width: 100%" appearance="fill">
+            <mat-label>E-mail</mat-label>
+            <input
+              required
+              type="email"
+              maxlength="150"
+              formControlName="correo"
+              name="email"
+              matInput
+            />
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-3">
+          <mat-form-field style="width: 100%" appearance="fill">
+            <mat-label>Ciudad Y Estado</mat-label>
+            <mat-select
+              formControlName="ciudadYEstado"
+              name="ciudadYEstado"
+              required
+            >
+              <mat-option
+                *ngFor="let item of ciudadesEstados"
+                [value]="item.nombre"
+              >
+                {{ item.nombre }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-3">
+          <mat-form-field class="w-full">
+            <mat-label>Fecha</mat-label>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              formControlName="fecha"
+              required
+              name="fecha"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="picker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <button mat-flat-button color="primary" type="submit">Agregar</button>
+    </form>
+  </div>
 </div>

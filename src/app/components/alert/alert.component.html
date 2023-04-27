@@ -1,0 +1,18 @@
+<div *ngIf="data" class="flex" style="width: 100%" mat-dialog-title>
+  <div>
+    <h2 class="m-0 flex-auto" style="text-align: left">
+      {{ data.title }}
+    </h2>
+    <hr />
+    <p class="text-muted fs-6">{{ data.message }}</p>
+    <div *ngIf="data.errors.length > 0">
+      <ul>
+        <li class="text-danger fs-6" *ngFor="let error of data.errors">
+          {{ error }}
+        </li>
+      </ul>
+    </div>
+
+    <button color="primary" mat-flat-button mat-dialog-close>Aceptar</button>
+  </div>
+</div>
