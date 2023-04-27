@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { EmailService } from './services/email.service';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CiudadEstadoService } from './services/ciudad-estado.service';
 import { ICiudadYEstado } from './models/ciudad-estado.model';
 import { MatDialog } from '@angular/material/dialog';
@@ -11,6 +11,7 @@ import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/materia
 
 import * as _moment from 'moment';
 import * as e from 'cors';
+import { Observable, Subscription, map, startWith } from 'rxjs';
 
 export const MY_FORMATS = {
   parse: {
@@ -41,7 +42,8 @@ export const MY_FORMATS = {
     { provide: MAT_DATE_FORMATS, useValue: MY_FORMATS },
   ],
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
+  subscription: Subscription;
   title = 'Green Leaves';
   ciudadesEstados: ICiudadYEstado[] = [];
   selectedCiudadEstado: string = "";
@@ -51,6 +53,9 @@ export class AppComponent implements OnInit {
   fecha: Date = new Date();
   errors: string[] = [];
   form: FormGroup;
+  hideForm: boolean = false;
+  ciudadYEstado = new FormControl<string>('');
+  filteredOptions: Observable<ICiudadYEstado[]>;
 
   constructor(
     private emailService: EmailService,
@@ -61,38 +66,45 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.form = this.fb.group({
-      fecha: ['', [Validators.required]],
-      nombre: ['', Validators.required],
-      telefono: ['', Validators.required],
-      correo: ['', [Validators.required, Validators.email]],
-      ciudadYEstado: ['', Validators.required],
-    });
-
     this.ciudadEstadoService.get().subscribe({
       next: data => {
-        console.log(data);
         this.ciudadesEstados = data;
+        this.filteredOptions = this.ciudadYEstado.valueChanges.pipe(
+          startWith(''),
+          map(value => this._filter(value || '')),
+        );
       },
       error: err => {
         this.ciudadesEstados = [];
       }
     })
+
+    this.form = this.fb.group({
+      fecha: ['', [Validators.required]],
+      nombre: ['', [Validators.required, Validators.pattern('')]],
+      telefono: ['', Validators.required],
+      correo: ['', [Validators.required, Validators.email]],
+      ciudadYEstado: new FormControl(this.ciudadYEstado, Validators.required)
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
 
   send() {
     if (this.form.invalid) {
       if (this.form.get('fecha')?.errors?.['required']) {
-        this.errors.push('Fecha inválida');
+        this.errors.push('La fecha no es válida');
       }
 
       if (
         this.form.get('nombre')?.errors ||
         this.form.get('correo')?.errors?.['required'] ||
         this.form.get('telefono')?.errors?.['required'] ||
-        this.form.get('ciudadYEstado')?.errors?.['required']) {
-        this.errors.push('Hace falta data');
+        this.ciudadYEstado.errors?.['required']) {
+        this.errors.push('Faltan datos');
       }
 
       if (this.form.get('correo')?.errors?.['email']) {
@@ -100,7 +112,7 @@ export class AppComponent implements OnInit {
       }
 
       this.dialog.open(AlertComponent, {
-        data: { title: "Error", message: "Han ocurrido los siguientes errores: ", errors: this.errors },
+        data: { title: "Error", message: "Se encontraron los siguientes errores en sus datos de contacto: ", errors: this.errors, error: true },
         width: "350px"
       })
 
@@ -109,9 +121,10 @@ export class AppComponent implements OnInit {
       return;
     }
 
+    this.hideForm = true;
+
     this.emailService.post(this.form.value).subscribe({
       next: data => {
-        console.log(data);
         this.dialog.open(AlertComponent, {
           data: { title: "Excelente", message: "Se ha creado el registro correctamente" },
           width: '350px'
@@ -124,5 +137,19 @@ export class AppComponent implements OnInit {
         });
       }
     });
+  }
+
+  displayFn(data?: ICiudadYEstado): string {
+    return data ? data.nombre : "";
+  }
+
+  private _filter(value: string): any {
+    if (value.length > 2) {
+      const filterValue = value.toLowerCase();
+
+      return this.ciudadesEstados.filter(option =>
+        option.nombre.toLowerCase().indexOf(filterValue) > -1);
+
+    }
   }
 }

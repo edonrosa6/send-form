@@ -8,7 +8,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 })
 export class AlertComponent implements OnInit {
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: { title: string, message: string, errors: string[] },
+  constructor(@Inject(MAT_DIALOG_DATA) public data: { title: string, message: string, errors: string[], error?: boolean },
     private dialogRef: MatDialogRef<AlertComponent>) {
   }
 

@@ -1,6 +1,6 @@
 <div *ngIf="data" class="flex" style="width: 100%" mat-dialog-title>
   <div>
-    <h2 class="m-0 flex-auto" style="text-align: left">
+    <h2 class="mt-0 flex-auto" style="text-align: left">
       {{ data.title }}
     </h2>
     <hr />
@@ -13,6 +13,10 @@
       </ul>
     </div>
 
-    <button color="primary" mat-flat-button mat-dialog-close>Aceptar</button>
+    <p class="text-muted fs-6" *ngIf="data.error">
+      Por favor corrija los errores para continuar
+    </p>
+
+    <button color="primary" mat-flat-button mat-dialog-close>OK</button>
   </div>
 </div>

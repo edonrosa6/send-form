@@ -6,7 +6,12 @@
     <div class="bg-success rounded mb-4 py-3 px-4 w-100">
       <h1 class="text-light">{{ title }}</h1>
     </div>
-    <form (ngSubmit)="send()" [formGroup]="form" class="w-100">
+    <form
+      *ngIf="!hideForm; else textConfirmForm"
+      (ngSubmit)="send()"
+      [formGroup]="form"
+      class="w-100"
+    >
       <div class="row">
         <div class="col-md-3">
           <mat-form-field style="width: 100%" appearance="fill">
@@ -28,7 +33,7 @@
             <input
               required
               type="text"
-              maxlength="40"
+              maxlength="10"
               formControlName="telefono"
               name="telefono"
               matInput
@@ -52,43 +57,68 @@
         </div>
 
         <div class="col-md-3">
-          <mat-form-field style="width: 100%" appearance="fill">
-            <mat-label>Ciudad Y Estado</mat-label>
-            <mat-select
-              formControlName="ciudadYEstado"
-              name="ciudadYEstado"
-              required
-            >
-              <mat-option
-                *ngFor="let item of ciudadesEstados"
-                [value]="item.nombre"
-              >
-                {{ item.nombre }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-
-        <div class="col-md-3">
-          <mat-form-field class="w-full">
-            <mat-label>Fecha</mat-label>
+          <mat-form-field>
             <input
-              matInput
-              [matDatepicker]="picker"
-              formControlName="fecha"
               required
-              name="fecha"
+              type="text"
+              placeholder="Ciudad y Estado"
+              matInput
+              [formControl]="ciudadYEstado"
+              [matAutocomplete]="auto"
             />
-            <mat-datepicker-toggle
-              matSuffix
-              [for]="picker"
-            ></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
+            <mat-autocomplete #auto="matAutocomplete">
+              <mat-option
+                *ngFor="let option of filteredOptions | async"
+                [value]="option.nombre"
+              >
+                {{ option.nombre }}
+              </mat-option>
+            </mat-autocomplete>
           </mat-form-field>
         </div>
       </div>
 
+      <div class="col-md-3">
+        <mat-form-field class="w-full">
+          <mat-label>Fecha</mat-label>
+          <input
+            matInput
+            [matDatepicker]="picker"
+            formControlName="fecha"
+            required
+            name="fecha"
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="picker"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      </div>
+
       <button mat-flat-button color="primary" type="submit">Agregar</button>
     </form>
+    <ng-template #textConfirmForm>
+      <div class="w-100">
+        <div>
+          Estimado
+          <span class="fw-bold">{{ form.get("nombre")?.value }}</span
+          >, <br />Hemos recibido sus datos y nos pondremos en contacto con
+          usted en la brevedad posible. Enviaremos un correo con información a
+          su cuenta:<br />
+          <span class="fw-bold">
+            {{ form.get("correo")?.value }}
+          </span>
+        </div>
+        <div class="text-end">
+          <p>Atte.</p>
+          <p class="text-success">Green Leaves</p>
+          <p>
+            {{ this.ciudadYEstado.value }} a
+            {{ this.form.get("fecha")?.value | date : "longDate" }}
+          </p>
+        </div>
+      </div>
+    </ng-template>
   </div>
 </div>
