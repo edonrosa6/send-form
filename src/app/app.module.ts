@@ -18,6 +18,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import localeEs from "@angular/common/locales/es";
 import { registerLocaleData } from '@angular/common';
+import { RECAPTCHA_SETTINGS, RecaptchaFormsModule, RecaptchaModule, RecaptchaSettings } from 'ng-recaptcha';
+import { environment } from './environments/environment';
 registerLocaleData(localeEs, 'es');
 
 @NgModule({
@@ -40,11 +42,21 @@ registerLocaleData(localeEs, 'es');
     MatDialogModule,
     ReactiveFormsModule,
     FormsModule,
-    ComponentsModule
+    ComponentsModule,
+    RecaptchaModule,
+    RecaptchaFormsModule
   ],
-  providers: [{
-    provide: LOCALE_ID, useValue: 'es',
-  }],
+  providers: [
+    {
+      provide: LOCALE_ID, useValue: 'es',
+    },
+    {
+      provide: RECAPTCHA_SETTINGS,
+      useValue: {
+        siteKey: environment.recaptcha.siteKey,
+      } as RecaptchaSettings,
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

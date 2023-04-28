@@ -6,7 +6,7 @@ import { CommonModule } from "@angular/common";
 
 @NgModule({
     declarations: [
-        AlertComponent
+        AlertComponent,
     ],
     imports: [
         MatButtonModule,

@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { EmailService } from './services/email.service';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, NgForm, Validators } from '@angular/forms';
 import { CiudadEstadoService } from './services/ciudad-estado.service';
 import { ICiudadYEstado } from './models/ciudad-estado.model';
 import { MatDialog } from '@angular/material/dialog';
@@ -56,6 +56,7 @@ export class AppComponent implements OnInit {
   hideForm: boolean = false;
   ciudadYEstado = new FormControl<string>('');
   filteredOptions: Observable<ICiudadYEstado[]>;
+  token: string | undefined;
 
   constructor(
     private emailService: EmailService,
@@ -63,6 +64,7 @@ export class AppComponent implements OnInit {
     private ciudadEstadoService: CiudadEstadoService,
     private dialog: MatDialog
   ) {
+    this.token = undefined;
   }
 
   ngOnInit(): void {
@@ -88,7 +90,8 @@ export class AppComponent implements OnInit {
     });
   }
 
-  send() {
+  send(form: NgForm) {
+
     if (this.form.invalid) {
       if (this.form.get('telefono')?.errors?.['pattern']) {
         this.errors.push('El número de telefono solo acepta 10 caracteres numericos')
@@ -122,6 +125,14 @@ export class AppComponent implements OnInit {
 
       return;
     }
+    if (form.invalid) {
+      console.log(form);
+      for (const control of Object.keys(form.controls)) {
+        form.controls[control].markAsTouched();
+      }
+
+      return;
+    }
 
     this.hideForm = true;
 
@@ -132,6 +143,8 @@ export class AppComponent implements OnInit {
       nombre: this.form.get('nombre')?.value,
       telefono: this.form.get('telefono')?.value
     }
+
+
 
     this.emailService.post(request).subscribe({
       next: data => {
